@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.Outline;
 import android.graphics.Paint;
+import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.RectF;
@@ -25,6 +26,10 @@ import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
+import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.content.res.ResourcesCompat;
+import android.support.v7.widget.AppCompatImageButton;
 import android.util.AttributeSet;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -33,10 +38,10 @@ import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.ImageButton;
 import android.widget.TextView;
 
-public class FloatingActionButton extends ImageButton {
+@SuppressWarnings("unused")
+public class FloatingActionButton extends AppCompatImageButton {
 
     public static final int SIZE_NORMAL = 0;
     public static final int SIZE_MINI = 1;
@@ -106,12 +111,6 @@ public class FloatingActionButton extends ImageButton {
 
     public FloatingActionButton(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init(context, attrs, defStyleAttr);
-    }
-
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public FloatingActionButton(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
         init(context, attrs, defStyleAttr);
     }
 
@@ -450,6 +449,7 @@ public class FloatingActionButton extends ImageButton {
         }
     }
 
+    @SuppressWarnings("ResourceType")
     private void updateButtonPosition() {
         float x;
         float y;
@@ -547,21 +547,18 @@ public class FloatingActionButton extends ImageButton {
     public boolean onTouchEvent(MotionEvent event) {
         if (mClickListener != null && isEnabled()) {
             Label label = (Label) getTag(R.id.fab_label);
-            if (label == null) return super.onTouchEvent(event);
-
+            if (label == null) {
+                return super.onTouchEvent(event);
+            }
             int action = event.getAction();
             switch (action) {
                 case MotionEvent.ACTION_UP:
-                    if (label != null) {
-                        label.onActionUp();
-                    }
+                    label.onActionUp();
                     onActionUp();
                     break;
 
                 case MotionEvent.ACTION_CANCEL:
-                    if (label != null) {
-                        label.onActionUp();
-                    }
+                    label.onActionUp();
                     onActionUp();
                     break;
             }
@@ -644,9 +641,6 @@ public class FloatingActionButton extends ImageButton {
         private int circleInsetHorizontal;
         private int circleInsetVertical;
 
-        private CircleDrawable() {
-        }
-
         private CircleDrawable(Shape s) {
             super(s);
             circleInsetHorizontal = hasShadow() ? mShadowRadius + Math.abs(mShadowXOffset) : 0;
@@ -695,7 +689,7 @@ public class FloatingActionButton extends ImageButton {
         }
 
         @Override
-        public void draw(Canvas canvas) {
+        public void draw(@NonNull Canvas canvas) {
             canvas.drawCircle(calculateCenterX(), calculateCenterY(), mRadius, mPaint);
             canvas.drawCircle(calculateCenterX(), calculateCenterY(), mRadius, mErase);
         }
@@ -712,7 +706,7 @@ public class FloatingActionButton extends ImageButton {
 
         @Override
         public int getOpacity() {
-            return 0;
+            return PixelFormat.UNKNOWN;
         }
     }
 
@@ -798,7 +792,7 @@ public class FloatingActionButton extends ImageButton {
 
     @Override
     public void setImageResource(int resId) {
-        Drawable drawable = getResources().getDrawable(resId);
+        Drawable drawable = ResourcesCompat.getDrawable(getResources(), resId, null);
         if (mIcon != drawable) {
             mIcon = drawable;
             updateBackground();
@@ -850,7 +844,7 @@ public class FloatingActionButton extends ImageButton {
     }
 
     public void setColorNormalResId(int colorResId) {
-        setColorNormal(getResources().getColor(colorResId));
+        setColorNormal(ContextCompat.getColor(getContext(), colorResId));
     }
 
     public int getColorNormal() {
@@ -865,7 +859,7 @@ public class FloatingActionButton extends ImageButton {
     }
 
     public void setColorPressedResId(int colorResId) {
-        setColorPressed(getResources().getColor(colorResId));
+        setColorPressed(ContextCompat.getColor(getContext(), colorResId));
     }
 
     public int getColorPressed() {
@@ -880,7 +874,7 @@ public class FloatingActionButton extends ImageButton {
     }
 
     public void setColorRippleResId(int colorResId) {
-        setColorRipple(getResources().getColor(colorResId));
+        setColorRipple(ContextCompat.getColor(getContext(), colorResId));
     }
 
     public int getColorRipple() {
@@ -895,7 +889,7 @@ public class FloatingActionButton extends ImageButton {
     }
 
     public void setColorDisabledResId(int colorResId) {
-        setColorDisabled(getResources().getColor(colorResId));
+        setColorDisabled(ContextCompat.getColor(getContext(), colorResId));
     }
 
     public int getColorDisabled() {
@@ -1010,7 +1004,7 @@ public class FloatingActionButton extends ImageButton {
     }
 
     public void setShadowColorResource(int colorResId) {
-        int shadowColor = getResources().getColor(colorResId);
+        int shadowColor = ContextCompat.getColor(getContext(), colorResId);
         if (mShadowColor != shadowColor) {
             mShadowColor = shadowColor;
             updateBackground();
@@ -1168,7 +1162,6 @@ public class FloatingActionButton extends ImageButton {
         mProgressIndeterminate = indeterminate;
         mLastTimeAnimated = SystemClock.uptimeMillis();
         setupProgressBounds();
-//        saveButtonOriginalPosition();
         updateBackground();
     }
 
